@@ -109,29 +109,12 @@ MempoolStatus::read_mempool()
 
     // get txs in the mempool
     std::vector<tx_info> mempool_tx_info;
-    std::vector<spent_key_image_info> pool_key_image_info;
 
-    // get txpool from lmdb database instead of rpc call
-    if (!mcore->get_mempool().get_transactions_and_spent_keys_info(
-            mempool_tx_info,
-            pool_key_image_info))
+    if (!rpc.get_mempool(mempool_tx_info))
     {
         cerr << "Getting mempool failed " << endl;
         return false;
     }
-
-    (void) pool_key_image_info;
-
-    // sort txpool txs
-
-    // mempool txs are not sorted base on their arrival time,
-    // so we sort it here.
-
-    std::sort(mempool_tx_info.begin(), mempool_tx_info.end(),
-              [](tx_info& t1, tx_info& t2)
-              {
-                  return t1.receive_time > t2.receive_time;
-              });
 
     // if dont have tx_blob member, construct tx
     // from json obtained from the rpc call
@@ -156,9 +139,12 @@ MempoolStatus::read_mempool()
 
         mempool_size_kB += _tx_info.blob_size;
 
-        local_copy_of_mempool_txs.push_back(mempool_tx {tx_hash, tx});
+        local_copy_of_mempool_txs.push_back(mempool_tx{});
 
         mempool_tx& last_tx = local_copy_of_mempool_txs.back();
+
+        last_tx.tx_hash = tx_hash;
+        last_tx.tx = tx;
 
         // key images of inputs
         vector<txin_to_key> input_key_imgs;
@@ -174,7 +160,7 @@ MempoolStatus::read_mempool()
 
         double tx_size =  static_cast<double>(_tx_info.blob_size)/1024.0;
 
-        double payed_for_kB = XMR_AMOUNT(_tx_info.fee) / tx_size;
+        double payed_for_kB = ARQ_AMOUNT(_tx_info.fee) / tx_size;
 
         last_tx.receive_time = _tx_info.receive_time;
 
@@ -185,10 +171,10 @@ MempoolStatus::read_mempool()
         last_tx.mixin_no          = sum_data[2];
         last_tx.num_nonrct_inputs = sum_data[3];
 
-        last_tx.fee_str          = xmreg::xmr_amount_to_str(_tx_info.fee, "{:0.4f}", false);
+        last_tx.fee_str          = xmreg::arq_amount_to_str(_tx_info.fee, "{:0.4f}", false);
         last_tx.payed_for_kB_str = fmt::format("{:0.4f}", payed_for_kB);
-        last_tx.xmr_inputs_str   = xmreg::xmr_amount_to_str(last_tx.sum_inputs , "{:0.3f}");
-        last_tx.xmr_outputs_str  = xmreg::xmr_amount_to_str(last_tx.sum_outputs, "{:0.3f}");
+        last_tx.arq_inputs_str   = xmreg::arq_amount_to_str(last_tx.sum_inputs , "{:0.3f}");
+        last_tx.arq_outputs_str  = xmreg::arq_amount_to_str(last_tx.sum_outputs, "{:0.3f}");
         last_tx.timestamp_str    = xmreg::timestamp_to_str_gm(_tx_info.receive_time);
 
         last_tx.txsize           = fmt::format("{:0.2f}", tx_size);
@@ -201,27 +187,15 @@ MempoolStatus::read_mempool()
         get_payment_id(tx, payment_id, payment_id8);
 
         if (payment_id != null_hash)
-        {
             last_tx.pID = 'l'; // legacy payment id
-        }
         else if (payment_id8 != null_hash8)
-        {
             last_tx.pID = 'e'; // encrypted payment id
-        }
         else if (!get_additional_tx_pub_keys_from_extra(tx).empty())
         {
             // if multioutput tx have additional public keys,
             // mark it so that it represents that it has at least
             // one sub-address
             last_tx.pID = 's';
-        }
-        else
-        {
-            tx_extra_uniform_payment_id uniform_pid;
-            if(get_payment_id_from_tx_extra(tx.extra, uniform_pid))
-            {
-                last_tx.pID = 'u'; // uniform payment id
-            }
         }
        // } // if (hex_to_pod(_tx_info.id_hash, mem_tx_hash))
 
@@ -254,7 +228,17 @@ MempoolStatus::read_network_info()
     if (!rpc.get_network_info(rpc_network_info))
         return false;
 
+    uint64_t fee_estimated;
+
     string error_msg;
+
+    if (!rpc.get_dynamic_per_kb_fee_estimate(
+            FEE_ESTIMATE_GRACE_BLOCKS,
+            fee_estimated, error_msg))
+    {
+        cerr << "rpc.get_dynamic_per_kb_fee_estimate failed" << endl;
+        return false;
+    }
 
     (void) error_msg;
 
@@ -278,7 +262,7 @@ MempoolStatus::read_network_info()
     local_copy.outgoing_connections_count = rpc_network_info.outgoing_connections_count;
     local_copy.incoming_connections_count = rpc_network_info.incoming_connections_count;
     local_copy.white_peerlist_size        = rpc_network_info.white_peerlist_size;
-    local_copy.nettype                    = rpc_network_info.testnet ? cryptonote::network_type::TESTNET : 
+    local_copy.nettype                    = rpc_network_info.testnet ? cryptonote::network_type::TESTNET :
                                             rpc_network_info.stagenet ? cryptonote::network_type::STAGENET : cryptonote::network_type::MAINNET;
     local_copy.cumulative_difficulty      = rpc_network_info.cumulative_difficulty;
     local_copy.block_size_limit           = rpc_network_info.block_size_limit;
@@ -300,7 +284,7 @@ MempoolStatus::read_network_info()
     epee::string_tools::hex_to_pod(rpc_network_info.top_block_hash,
                                    local_copy.top_block_hash);
 
-    local_copy.fee_per_kb                 = 500000;
+    local_copy.fee_per_kb                 = fee_estimated;
     local_copy.info_timestamp             = static_cast<uint64_t>(std::time(nullptr));
 
     local_copy.current_hf_version         = rpc_hardfork_info.version;
@@ -335,8 +319,8 @@ MempoolStatus::is_thread_running()
     return is_running;
 }
 
-bf::path MempoolStatus::blockchain_path {"/home/mwo/.bitmonero/lmdb"};
-string MempoolStatus::deamon_url {"http:://127.0.0.1:18081"};
+bf::path MempoolStatus::blockchain_path {"/home/pooldaemon/.arqma/lmdb"};
+string MempoolStatus::deamon_url {"http://127.0.0.1:19994"};
 cryptonote::network_type MempoolStatus::nettype {cryptonote::network_type::MAINNET};
 atomic<bool>       MempoolStatus::is_running {false};
 boost::thread      MempoolStatus::m_thread;
