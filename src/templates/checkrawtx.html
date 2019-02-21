@@ -3,7 +3,7 @@
   <div class="table-header">
     Check Transaction
   </div>
-  
+
   <div class="table-scroller">
     <div class="monospace pure-g">
 
@@ -22,11 +22,11 @@
         {{error_msg}}
       </div>
       {{/has_error}}
-      
+
     </div>
 
   </div>
-  
+
   {{#unsigned_tx_given}}
 
   {{#txs}}
@@ -77,10 +77,10 @@
   <div class="table-header">
     Input ring size time scale
   </div>
-  
+
   <div class="table-scroller">
     <div class="table-container">
-      
+
       <div class="table-subheader">
         (from {{min_mix_time}} till {{max_mix_time}};
         resolution: {{timescales_scale}} days{{#have_raw_tx}}; R - real ring member {{/have_raw_tx}})
@@ -100,9 +100,9 @@
 
   <div class="table-scroller">
     <div class="table-container multi-table-container">
-      
+
       <div class="table-subheader">
-        Output(s) for total of {{sum_outputs_amounts}} Ryo
+        Output(s) for total of {{sum_outputs_amounts}} ARQ
       </div>
 
       {{#dest_sources}}
@@ -137,9 +137,9 @@
 
     </div>
   </div>
-      
+
   {{/txs}}
-  
+
   {{/unsigned_tx_given}}
 
   {{^unsigned_tx_given}}
@@ -148,7 +148,7 @@
   <div class="table-header">
     Signed raw tx details
   </div>
-  
+
   <div class="table-scroller">
     <div class="table-container">
       <table class="pure-table pure-table-striped">
@@ -178,7 +178,7 @@
       </table>
     </div>
   </div>
-  
+
   {{>tx_details}}
 
   {{#tx_json}}
@@ -188,7 +188,7 @@
     </code>
   </pre>
   {{/tx_json}}
-  
+
   {{/txs}}
 
   {{/unsigned_tx_given}}

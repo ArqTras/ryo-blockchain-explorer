@@ -31,7 +31,7 @@
         <span id="payment_id">{{uniform_payment_id}}</span>
       </div>
       {{/uniform_payment_id}}
-      
+
       {{#has_payment_id}}
       <div class="pure-u-1-4 pure-u-md-1-5">
         <span>Payment id</span>
@@ -40,7 +40,7 @@
         <span id="payment_id">{{payment_id}}</span>
       </div>
       {{/has_payment_id}}
-      
+
       {{#has_payment_id8}}
       {{^decrypted_payment_id8}}
       <div class="pure-u-1-4 pure-u-md-1-5">
@@ -66,7 +66,7 @@
       <div class="pure-u-3-4 pure-u-md-4-5">
         <span>{{blk_timestamp}}</span>
       </div>
-      
+
       <div class="pure-u-1-4 pure-u-md-1-5">
         <span>Age [y:d:h:m:s]</span>
       </div>
@@ -92,17 +92,17 @@
       <div class="pure-u-3-4 pure-u-md-4-5">
         <span>{{tx_fee}}</span>
       </div>
-      
+
       <div class="pure-u-1-4 pure-u-md-1-5">
         <span>Tx size</span>
       </div>
       <div class="pure-u-3-4 pure-u-md-4-5">
         <span>{{tx_size}} kB</span>
       </div>
-      
+
     </div>
-  </div>    
-  
+  </div>
+
   {{^tx_prove}}
   <div class="table-header">
     Decode outputs
@@ -127,7 +127,7 @@
     </div>
   </div>
   {{/tx_prove}}
-  
+
   {{#tx_prove}}
   <div class="table-header">
     Prove sending
@@ -154,16 +154,16 @@
   </div>
   {{/tx_prove}}
 
-  
+
   <div class="table-header">
     Outputs ({{outputs_no}})
   </div>
 
   <div class="table-scroller">
     <div class="table-container">
-      
+
       <div class="table-subheader">
-        Sum Ryo from matched outputs (i.e., incoming Ryo):
+        Sum ARQ from matched outputs (i.e., incoming ARQ):
         {{#found_our_outputs}}
         {{sum_xmr}}
         {{/found_our_outputs}}
@@ -211,7 +211,7 @@
 
   <div class="table-scroller">
     <div class="table-container multi-table-container">
-      
+
       {{#inputs}}
       <div class="table-subheader">
         Key image: {{key_image}}, Amount {{key_image_amount}}
@@ -258,10 +258,10 @@
       {{/has_mixin_outputs}}
       {{/mixins}}
       {{/inputs}}
-      
+
     </div>
   </div>
-  
+
   <div class="table-header">
     Details
   </div>
@@ -271,11 +271,11 @@
       <table class="pure-table pure-table-striped">
         <tr>
           <td>Sum from matched and marked by * ring member's outputs</td>
-          <td>{{sum_mixin_xmr}} Ryo</td>
+          <td>{{sum_mixin_xmr}} ARQ</td>
         </tr>
         <tr>
           <td>Possible spending is</td>
-          <td>{{possible_spending}} Ryo (tx fee included)</td>
+          <td>{{possible_spending}} ARQ (tx fee included)</td>
         </tr>
         <tr>
           <td colspan="2">
@@ -286,7 +286,7 @@
         <tr>
           <td colspan="2">
             Number of our possible mixins is {{no_all_possible_mixins}}
-            for {{all_possible_mixins_amount}} Ryo.
+            for {{all_possible_mixins_amount}} ARQ.
           </td>
         </tr>
       </table>

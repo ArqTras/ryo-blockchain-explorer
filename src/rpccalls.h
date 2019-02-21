@@ -6,7 +6,7 @@
 #ifndef CROWXMR_RPCCALLS_H
 #define CROWXMR_RPCCALLS_H
 
-#include "monero_headers.h"
+#include "arqma_headers.h"
 
 #include <mutex>
 #include <utility>
@@ -81,7 +81,7 @@ class rpccalls
 
 public:
 
-    rpccalls(string _deamon_url = "http:://127.0.0.1:18081",
+    rpccalls(string _deamon_url = "http://127.0.0.1:19994",
              uint64_t _timeout = 200000);
 
     bool
@@ -101,6 +101,13 @@ public:
 
     bool
     get_hardfork_info( COMMAND_RPC_HARD_FORK_INFO::response& res);
+
+    bool
+    get_dynamic_per_kb_fee_estimate(
+            uint64_t grace_blocks,
+            uint64_t& fee,
+            string& error_msg);
+
 
     /**
      * This must be in the header for now, as it will be tempalte function

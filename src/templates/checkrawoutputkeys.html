@@ -13,7 +13,7 @@
       <div class="pure-u-3-4 pure-u-md-4-5 line-break">
         <span>{{data_prefix}}</span>
       </div>
-      
+
       {{#has_error}}
       <div class="pure-u-1" style="color:red">
         Attempt failed
@@ -22,7 +22,7 @@
         {{error_msg}}
       </div>
       {{/has_error}}
-      
+
       {{^has_error}}
       <div class="pure-u-1-4 pure-u-md-1-5">
         <span>Output keys for address</span>
@@ -40,7 +40,7 @@
 
       {{#has_total_xmr}}
       <div class="pure-u-1-4 pure-u-md-1-5">
-        <span>Total Ryo</span>
+        <span>Total ARQ</span>
       </div>
       <div class="pure-u-3-4 pure-u-md-4-5 line-break">
         <span>{{total_xmr}}</span>
@@ -93,6 +93,6 @@
       </table>
     </div>
     {{/has_error}}
-    
+
   </div>
 </div>
