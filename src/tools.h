@@ -7,7 +7,7 @@
 
 #define PATH_SEPARARTOR '/'
 
-#define XMR_AMOUNT(value) \
+#define ARQ_AMOUNT(value) \
     static_cast<double>(value) / 1e9
 
 #define REMOVE_HASH_BRAKETS(a_hash) \
@@ -15,7 +15,7 @@
 
 
 
-#include "monero_headers.h"
+#include "arqma_headers.h"
 
 #include "../ext/fmt/ostream.h"
 #include "../ext/fmt/format.h"
@@ -211,7 +211,7 @@ get_key_images(const transaction& tx);
 
 
 bool
-get_payment_id(const ::tools::wallet2::tx_construction_data& tx_cd,
+get_payment_id(const vector<uint8_t>& extra,
                crypto::hash& payment_id,
                crypto::hash8& payment_id8);
 
@@ -222,7 +222,7 @@ get_payment_id(const transaction& tx,
 
 
 inline double
-get_xmr(uint64_t core_amount)
+get_arq(uint64_t core_amount)
 {
     return  static_cast<double>(core_amount) / 1e9;
 }
@@ -237,7 +237,7 @@ read(string filename);
 pair<string, double>
 timestamps_time_scale(const vector<uint64_t>& timestamps,
                       uint64_t timeN, uint64_t resolution = 80,
-                      uint64_t time0 = 1397818193 /* timestamp of the second block */);
+                      uint64_t time0 = 1529003126 /* timestamp of the second block */);
 
 bool
 decode_ringct(const rct::rctSig & rv,
@@ -273,7 +273,7 @@ get_tx_pub_key_from_received_outs(const transaction &tx);
 
 static
 string
-xmr_amount_to_str(const uint64_t& xmr_amount,
+arq_amount_to_str(const uint64_t& arq_amount,
                   string _format="{:0.9f}",
                   bool zero_to_question_mark=true)
 {
@@ -281,13 +281,13 @@ xmr_amount_to_str(const uint64_t& xmr_amount,
 
     if (!zero_to_question_mark)
     {
-        amount_str = fmt::format(_format, XMR_AMOUNT(xmr_amount));
+        amount_str = fmt::format(_format, ARQ_AMOUNT(arq_amount));
     }
     else
     {
-        if (xmr_amount > 0 && zero_to_question_mark == true)
+        if (arq_amount > 0 && zero_to_question_mark == true)
         {
-            amount_str = fmt::format(_format, XMR_AMOUNT(xmr_amount));
+            amount_str = fmt::format(_format, ARQ_AMOUNT(arq_amount));
         }
     }
 
@@ -331,7 +331,7 @@ void chunks(Iterator begin,
     }
     while(std::distance(chunk_begin,end) > 0);
 }
-    
+
 /*
  * Remove all characters in in_str that match the given
  * regular expression
@@ -369,6 +369,9 @@ calc_median(It it_begin, It it_end)
 
 void
 pause_execution(uint64_t no_seconds, const string& text = "now");
+
+string
+tx_to_hex(transaction const& tx);
 
 }
 
